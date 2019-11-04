@@ -1,0 +1,89 @@
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
+
+public class RegistrationPage {
+
+	public class driver {
+		
+		public WebDriver driver;
+
+		public void Test () throws InterruptedException {
+			
+			//Driver initialization and invoking application
+			
+			System.setProperty("webdriver.chrome.driver", System.getProperty("user.dir")+"/drivers/chromedriver.exe");
+			driver = new ChromeDriver ();
+			driver.get("https://www.commbank.com.au");
+		    
+			// scroll down for <Tell me more> link and click on it.	
+			
+			scrollUntilAppears(driver, 10);
+			
+			driver.findElements(By.xpath("//p[@class='guidance-link-text']")).get(0).click();
+			
+			//Asserting various sections are present on the page or not
+			
+			Assert.assertEquals(driver.findElements(By.xpath("//div/h2[contains(text(),'1. A mix of cash and cards')]")).size(), 1);
+			Assert.assertEquals(driver.findElements(By.xpath("//div/h2[contains(text(),'2. Get travel insurance')]")).size(), 1);
+			Assert.assertEquals(driver.findElements(By.xpath("//div/h2[contains(text(),'3. Review home and contents insurance')]")).size(), 1);
+			
+			//click on the NetBank link and then assert that Login page is loaded or not 
+			
+			driver.findElement(By.xpath("//p/a[@href='https://www.my.commbank.com.au/netbank/Logon/Logon.aspx'and contains(text(),'NetBank')]")).click();
+			explicit_wait(driver, By.xpath("//div/h2[contains(text(),'Log on to NetBank')]"), 20);
+			Assert.assertEquals(driver.findElements(By.xpath("//div/h2[contains(text(),'Log on to NetBank')]")).size(), 1);
+			
+			Exit_browser();
+		}
+
+		public void Exit_browser() {
+			driver.quit();
+		}
+
+		public void scroll(WebDriver driver, String direction) {
+			if(direction.equals("down")) {
+				JavascriptExecutor js = (JavascriptExecutor) driver;
+				js.executeScript("window.scrollBy(0, 1000)");
+			}
+		}
+		
+		public void element_exist_check (WebDriver driver, By by, int wait) {
+			explicit_wait(driver, by, wait);
+			driver.findElement(by);
+		}
+		
+		public void explicit_wait(WebDriver driver,By by, int wait) {
+			WebDriverWait wait2= new WebDriverWait(driver, wait);
+			wait2.until(ExpectedConditions.presenceOfElementLocated(by));
+		}
+		
+	    public void scrollUntilAppears (WebDriver driver, int wait) {
+			
+			int size = driver.findElements(By.xpath("//p[@class='guidance-link-text']")).size();
+			if(size>=1) {
+				System.out.println("Element found with 0 scrolls");
+				return;
+			}
+			else {
+				int i = 0;
+				while (size == 0 && i<10) {
+					scroll(driver, "down");
+					int size2 = driver.findElements(By.xpath("//p[@class='guidance-link-text']")).size();
+					if (size>=1) {
+						System.out.println("Element found after scrolls");
+						i++;
+						return;
+					}
+				}
+				element_exist_check(driver,By.xpath("//p[@class='guidance-link-text']"), wait);				
+			}
+		}
+
+	}
+	
+}
